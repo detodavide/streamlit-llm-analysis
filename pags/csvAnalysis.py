@@ -26,12 +26,12 @@ def load_data(uploaded_file):
     return df
 
 def call_selection_agent(df, x="None", y="None", color="None"):
-    llm = ChatOllama(model='llama3:8b', temperature=0.0)
+    llm = ChatOpenAI(model='gpt-3.5-turbo', temperature=0.0)
     agent = create_pandas_dataframe_agent(
         prefix=f"""You are a helpful data analyst expert that gives elaborate insight data.""" ,
         llm=llm,
         df=df,
-        agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+        agent_type=AgentType.OPENAI_FUNCTIONS,
         verbose=True
     )
     agent.handle_parsing_errors=True
