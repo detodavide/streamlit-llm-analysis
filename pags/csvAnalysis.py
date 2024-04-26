@@ -26,12 +26,12 @@ def load_data(uploaded_file):
     return df
 
 def call_selection_agent(df, x="None", y="None", color="None"):
-    llm = ChatOllama(model='phi3:3.8b', temperature=0.0)
+    llm = ChatOllama(model='llama3:8b', temperature=0.0)
     agent = create_pandas_dataframe_agent(
         prefix=f"""You are a helpful data analyst expert that gives elaborate insight data.""" ,
         llm=llm,
         df=df,
-        agent_type=AgentType.OPENAI_FUNCTIONS,
+        agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
         verbose=True
     )
     agent.handle_parsing_errors=True
@@ -54,8 +54,7 @@ def call_pandas_agent(df):
     sdf = SmartDataframe(df, config={"llm": llm})
     return sdf
 
-# Main Streamlit app
-def main():
+def app():
     st.title("CSV Analysis with AI Assistant")
 
     # File upload
@@ -125,8 +124,3 @@ def main():
                                 st.markdown(f'<p style="color:white; font-size:16px;">Question: {chat}</p>', unsafe_allow_html=True)
                                 st.write(res["output"])
 
-
-
-    
-if __name__ == "__main__":
-    main()
