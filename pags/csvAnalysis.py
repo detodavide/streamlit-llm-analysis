@@ -9,6 +9,11 @@ from langchain.agents.agent_types import AgentType
 from pandasai import Agent, SmartDataframe
 from pandasai.llm import OpenAI
 from langchain_community.chat_models import ChatOllama
+from llm.setup import PlotlyData, AISetup
+from langchain_core.output_parsers import StrOutputParser
+
+from langchain_groq import ChatGroq
+from langchain_core.runnables import RunnableSerializable
 from dotenv import load_dotenv,find_dotenv
 load_dotenv(find_dotenv())
 
@@ -25,30 +30,6 @@ def load_data(uploaded_file):
     df = pd.read_csv(uploaded_file)
     return df
 
-def call_selection_agent(df, x="None", y="None", color="None"):
-    llm = ChatOpenAI(model='gpt-3.5-turbo', temperature=0.0)
-    agent = create_pandas_dataframe_agent(
-        prefix=f"""You are a helpful data analyst expert that gives elaborate insight data.""" ,
-        llm=llm,
-        df=df,
-        agent_type=AgentType.OPENAI_FUNCTIONS,
-        verbose=True
-    )
-    agent.handle_parsing_errors=True
-    return agent
-
-def call_question_agent(df, x="None", y="None", color="None"):
-    llm = ChatOpenAI(model='gpt-3.5-turbo', temperature=0.0)
-    agent = create_pandas_dataframe_agent(
-        prefix=f"""You are a helpful data analyst expert that gives elaborate insight in the context of the Dataframe, based on the user question.""" ,
-        llm=llm,
-        df=df,
-        agent_type=AgentType.OPENAI_FUNCTIONS,
-        verbose=True
-    )
-    agent.handle_parsing_errors=True
-    return agent
-
 def call_pandas_agent(df):
     llm = OpenAI()
     sdf = SmartDataframe(df, config={"llm": llm})
@@ -62,8 +43,6 @@ def app():
     if uploaded_file is not None:
         df = load_data(uploaded_file)
         st.dataframe(df)
-
-        agent_options = ["LangChain Agent", "PandasAI Agent"]
 
         if df is not None:
             column_options = df.columns.tolist()
@@ -87,40 +66,34 @@ def app():
                         chat = st.chat_input("Ask a question about the data")
 
                     with bot_message:
-                        selected_agent = st.selectbox("Select the AI Agent to assist you", agent_options)
-                        if selected_agent == "LangChain Agent":
-                            if event_data and not chat:
-                                data = event_data.select["points"][0]
-                                agent = call_selection_agent(df,x,y,color)
-                                st.write(f"- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}")
-                                questions = agent.invoke(f"Write some insightful questions about this specific data:\n- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']} with respect to the dataframe, but keep the focus on the specific data.")
-                                extracted_questions = extract_questions(questions["output"])
-                                answer_list = []
-                                for i, question in enumerate(extracted_questions, start=1):
-                                    res = agent.invoke(f"{question}")
-                                    answer_list.append(res["output"])
-                                answers = "\n".join(answer_list)
-                                final_res = agent.invoke(f"Given this context:\n{answers}\nWrite a concise summary of the context in a discorsive way and in italian.")
-                                st.write(final_res["output"])
 
-                            if chat:
-                                agent = call_question_agent(df,x,y,color)
-                                res = agent.invoke(f"Question: {chat}")
-                                st.markdown(f'<p style="color:white; font-size:16px;">Question: {chat}</p>', unsafe_allow_html=True)
-                                st.write(res["output"])
-                        if selected_agent == "PandasAI Agent":
-                            if event_data and not chat:
-                                data = event_data.select["points"][0]
-                                sdf = call_pandas_agent(df)
-                                st.write(f"- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}")
-                                row = sdf.chat(f"Given this data that represent a dataframe row:\n-{x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}\n\nFind the row representing this data.")
-                                st.write(row)
-                                res = sdf.chat(f"Given the row: {row}. There are any correlation or trend with other rows??")
-                                st.write(res)
+                        setup = AISetup(llm=ChatGroq(temperature=0, model_name="llama3-70b-8192"))
+                        input_data = PlotlyData(df=df, x=x, y=y, color=color)
 
-                            if chat:
-                                agent = call_question_agent(df,x,y,color)
-                                res = agent.invoke(f"Question: {chat}")
-                                st.markdown(f'<p style="color:white; font-size:16px;">Question: {chat}</p>', unsafe_allow_html=True)
-                                st.write(res["output"])
+                        if event_data and not chat:
+
+                            data = event_data.select["points"][0]
+                            # dataframe_agent = setup.get_pandas_agent("selection", input_data=input_data)
+
+                            chain = setup.get_analyst_executor(agent_mode="selection", input_data=input_data) 
+
+                            st.write(f"- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}")
+                            questions = chain.invoke(f"\nDataframe:\n{df}\nWrite 10 insightful questions about this specific data:\n- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}.")
+
+                            extracted_questions = extract_questions(questions)
+                            answer_list = []
+                            for i, question in enumerate(extracted_questions, start=1):
+                                res = chain.invoke(f"{question}")
+                                answer_list.append(res)
+                            answers = "\n".join(answer_list)
+                            final_res = chain.invoke(f"Given this context:\n{answers}\nWrite a summary in italian with respect to this specific data:\n- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}.")
+                            st.write(final_res)
+
+                        if chat:
+
+                            agent = setup.get_pandas_agent("question", input_data=input_data)
+
+                            res = agent.invoke(f"Question: {chat}")
+                            st.markdown(f'<p style="color:white; font-size:16px;">Question: {chat}</p>', unsafe_allow_html=True)
+                            st.write(res["output"])
 

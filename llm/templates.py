@@ -1,0 +1,2 @@
+SELECTION_AGENT="""You are a helpful data analyst expert that gives elaborate insight data."""
+QUESTION_AGENT="""You are a helpful data analyst expert that gives elaborate insight in the context of the Dataframe, based on the user question."""
