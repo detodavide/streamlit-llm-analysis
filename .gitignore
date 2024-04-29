@@ -5,5 +5,4 @@ __pycache__
 pandasai.log
 exports/
 cache/
-*.csv
 *.txt
