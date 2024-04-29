@@ -67,7 +67,7 @@ def app():
 
                     with bot_message:
 
-                        setup = AISetup(llm=ChatGroq(temperature=0, model_name="llama3-70b-8192"))
+                        setup = AISetup(llm=ChatGroq(temperature=0, model_name="llama3-8b-8192"))
                         input_data = PlotlyData(df=df, x=x, y=y, color=color)
 
                         if event_data and not chat:
@@ -78,7 +78,8 @@ def app():
                             chain = setup.get_analyst_executor(agent_mode="selection", input_data=input_data) 
 
                             st.write(f"- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}")
-                            questions = chain.invoke(f"\nDataframe:\n{df}\nWrite 10 insightful questions about this specific data:\n- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}.")
+                            questions = chain.invoke(f"\nDataframe:\n{df}\nWrite 10 questions that focus on the relation with the dataframe and this specific data only:\n- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}.")
+                            st.write(questions)
 
                             extracted_questions = extract_questions(questions)
                             answer_list = []
@@ -86,7 +87,7 @@ def app():
                                 res = chain.invoke(f"{question}")
                                 answer_list.append(res)
                             answers = "\n".join(answer_list)
-                            final_res = chain.invoke(f"Given this context:\n{answers}\nWrite a summary in italian with respect to this specific data:\n- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}.")
+                            final_res = chain.invoke(f"Given this context:\n{answers}\nMake a whole summary in Italian taking into account that the text must focus on the data examined ({x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}) in relation to the dataframe.")
                             st.write(final_res)
 
                         if chat:

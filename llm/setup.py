@@ -30,7 +30,6 @@ class AISetup:
             raise ValueError("Invalid model type. llm must be an instance of ChatOllama, ChatOpenAI or ChatGroq.")
         self.llm = llm
 
-    # Agent that uses pandas tools
     def get_analyst_executor(self, agent_mode: str, input_data: PlotlyData):
         """
         High order function to call the agent/chain/smartdataframe based on the selected mode
