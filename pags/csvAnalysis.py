@@ -9,7 +9,7 @@ from langchain.agents.agent_types import AgentType
 from pandasai import Agent, SmartDataframe
 from pandasai.llm import OpenAI
 from langchain_community.chat_models import ChatOllama
-from llm.setup import PlotlyData, AISetup
+from llm.deprecated.setup import PlotlyData, AISetup
 from langchain_core.output_parsers import StrOutputParser
 from llm.langgraph.workflows.csv_point_selection_flow import schema_builder
 

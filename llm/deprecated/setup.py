@@ -12,7 +12,7 @@ from langchain.agents import AgentExecutor
 from typing import Any
 from pydantic import BaseModel
 from langchain_core.runnables import RunnableSerializable
-import llm.templates as templates
+import llm.deprecated.templates as templates
 import pandas as pd
 
 class PlotlyData(BaseModel):
