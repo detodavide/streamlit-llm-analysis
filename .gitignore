@@ -6,3 +6,4 @@ pandasai.log
 exports/
 cache/
 *.csv
+*.txt

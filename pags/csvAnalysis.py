@@ -11,6 +11,7 @@ from pandasai.llm import OpenAI
 from langchain_community.chat_models import ChatOllama
 from llm.setup import PlotlyData, AISetup
 from langchain_core.output_parsers import StrOutputParser
+from llm.langgraph.workflows.csv_point_selection_flow import schema_builder
 
 from langchain_groq import ChatGroq
 from langchain_core.runnables import RunnableSerializable
@@ -73,22 +74,18 @@ def app():
                         if event_data and not chat:
 
                             data = event_data.select["points"][0]
-                            # dataframe_agent = setup.get_pandas_agent("selection", input_data=input_data)
+                            input_data = f"- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}"
+                            st.write(input_data)
+                            
+                            # Compile the graph
+                            graph_app = schema_builder()
 
-                            chain = setup.get_analyst_executor(agent_mode="selection", input_data=input_data) 
+                            # Graph inputs
+                            inputs = ({"df": df, "input_data": input_data, "num_steps": 0})
 
-                            st.write(f"- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}")
-                            questions = chain.invoke(f"\nDataframe:\n{df}\nWrite 10 questions that focus on the relation with the dataframe and this specific data only:\n- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}.")
-                            st.write(questions)
-
-                            extracted_questions = extract_questions(questions)
-                            answer_list = []
-                            for i, question in enumerate(extracted_questions, start=1):
-                                res = chain.invoke(f"{question}")
-                                answer_list.append(res)
-                            answers = "\n".join(answer_list)
-                            final_res = chain.invoke(f"Given this context:\n{answers}\nMake a whole summary in Italian taking into account that the text must focus on the data examined ({x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}) in relation to the dataframe.")
-                            st.write(final_res)
+                            # Run
+                            res_analysis = graph_app.invoke(inputs)
+                            st.write(res_analysis["summary"])
 
                         if chat:
 
