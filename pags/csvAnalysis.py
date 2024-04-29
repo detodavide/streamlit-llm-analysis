@@ -4,7 +4,7 @@ import plotly.express as px
 from pandasai import Agent, SmartDataframe
 from pandasai.llm import OpenAI
 from llm.deprecated.setup import PlotlyData, AISetup
-from llm.langgraph.workflows.csv_point_selection_flow import schema_builder
+from llm.langgraph.csv_point_selection.workflows import schema_builder
 
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv,find_dotenv

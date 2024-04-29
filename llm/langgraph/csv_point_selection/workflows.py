@@ -1,6 +1,6 @@
 from langgraph.graph import StateGraph, END
-from llm.langgraph.states.csv_point_selection_state import GraphState as CPSGraphState
-from llm.langgraph.nodes.csv_point_selection_nodes import *
+from llm.langgraph.csv_point_selection.states import GraphState as CPSGraphState
+from llm.langgraph.csv_point_selection.nodes import *
 
 # Init Graph
 def schema_builder():
