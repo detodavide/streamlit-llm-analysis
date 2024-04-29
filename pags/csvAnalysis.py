@@ -1,16 +1,12 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from pandasai import Agent, SmartDataframe
+from pandasai import SmartDataframe
 from pandasai.llm import OpenAI
-from llm.deprecated.setup import PlotlyData, AISetup
 from llm.langgraph.csv_point_selection.workflows import schema_builder
 
-from langchain_groq import ChatGroq
 from dotenv import load_dotenv,find_dotenv
 load_dotenv(find_dotenv())
-
-import re
 
 def load_data(uploaded_file):
     df = pd.read_csv(uploaded_file)
