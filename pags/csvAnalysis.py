@@ -3,7 +3,8 @@ import pandas as pd
 import plotly.express as px
 from pandasai import SmartDataframe
 from pandasai.llm import OpenAI
-from llm.langgraph.csv_point_selection.workflows import schema_builder
+from llm.langgraph.csv_point_selection.workflows import schema_builder as selection_builder
+from llm.langgraph.csv_user_question.workflows import schema_builder as question_builder
 
 from dotenv import load_dotenv,find_dotenv
 load_dotenv(find_dotenv())
@@ -48,15 +49,14 @@ def app():
                         chat = st.chat_input("Ask a question about the data")
 
                     with bot_message:
+                        data = event_data.select["points"][0]
+                        input_data = f"- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}"
+                        st.write(input_data)
 
                         if event_data and not chat:
-
-                            data = event_data.select["points"][0]
-                            input_data = f"- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}"
-                            st.write(input_data)
                             
                             # Compile the graph
-                            graph_app = schema_builder()
+                            graph_app = selection_builder()
 
                             # Graph inputs
                             inputs = ({"df": df, "input_data": input_data, "num_steps": 0})
@@ -65,12 +65,15 @@ def app():
                             res_analysis = graph_app.invoke(inputs)
                             st.write(res_analysis["summary"])
 
-                        # if chat:
-                            # TODO aggiungere volendo anche ricerca online per avere più informazioni 
+                        if chat:
 
-                            # agent = setup.get_pandas_agent("question", input_data=input_data)
+                            # Compile the graph
+                            graph_app = question_builder()
 
-                            # res = agent.invoke(f"Question: {chat}")
-                            # st.markdown(f'<p style="color:white; font-size:16px;">Question: {chat}</p>', unsafe_allow_html=True)
-                            # st.write(res["output"])
+                            # Graph inputs
+                            inputs = ({"df": df, "input_data": input_data, "question": chat, "num_steps": 0})
+
+                            # Run
+                            res_analysis = graph_app.invoke(inputs)
+                            st.write(res_analysis["answer"])
 

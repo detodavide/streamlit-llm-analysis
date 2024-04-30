@@ -8,13 +8,8 @@ from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_groq import ChatGroq
-import logging
+from utils.logger import logger
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
-
-logger = logging.getLogger(__name__)
 GROQ_LLM = ChatGroq(
             model="llama3-70b-8192", temperature=0
         )

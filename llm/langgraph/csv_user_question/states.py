@@ -1,8 +1,7 @@
 from typing_extensions import TypedDict
 from typing import List
 import pandas as pd
-from utils.logger import logger
-
+from langchain.schema import Document
 
 class GraphState(TypedDict):
     """
@@ -18,7 +17,7 @@ class GraphState(TypedDict):
     """
     df: pd.DataFrame
     input_data: str
+    question: str
     num_steps: int
-    questions: str
-    answers: str
-    summary: str
+    answer: str
+    research_info: List[Document]
