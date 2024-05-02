@@ -10,7 +10,10 @@ from dotenv import load_dotenv,find_dotenv
 load_dotenv(find_dotenv())
 
 def load_data(uploaded_file):
-    df = pd.read_csv(uploaded_file)
+    if uploaded_file.type == 'application/vnd.ms-excel':
+        df = pd.read_excel(uploaded_file)
+    else:
+        df = pd.read_csv(uploaded_file)
     return df
 
 def call_pandas_agent(df):
@@ -22,7 +25,7 @@ def app():
     st.title("CSV Analysis with AI Assistant")
 
     # File upload
-    uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+    uploaded_file = st.file_uploader("Upload CSV or XLSX file", type=["csv", "xlsx"])
     if uploaded_file is not None:
         df = load_data(uploaded_file)
         st.dataframe(df)

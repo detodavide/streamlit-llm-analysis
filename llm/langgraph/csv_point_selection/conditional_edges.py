@@ -3,11 +3,6 @@ from langgraph.graph import StateGraph, END
 from langchain_groq import ChatGroq
 from utils.logger import logger
 
-
-GROQ_LLM = ChatGroq(
-            model="llama3-70b-8192", temperature=0
-        )
-
 def summary_reflection_router(state):
     """
     Route summary to critical reflection or END.

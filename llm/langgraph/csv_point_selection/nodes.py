@@ -9,10 +9,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_groq import ChatGroq
 from utils.logger import logger
-
-GROQ_LLM = ChatGroq(
-            model="llama3-70b-8192", temperature=0
-        )
+from llm.langgraph.csv_point_selection.llm_model import GROQ_LLM
 
 def generate_questions(state):   
     """Take the initial df and input_data to generate the questions based on the data"""
@@ -28,8 +25,8 @@ def generate_questions(state):
 
     <|eot_id|><|start_header_id|>user<|end_header_id|>
     Given the following dataframe: {df}\n
-
     Write 20 questions that focus on the INPUT DATA in relation to the whole dataframe ( correlations, meaningful insights ...), no preamble or explanation.
+
     INPUT DATA:{input_data}\n\n
     <|eot_id|>
     <|start_header_id|>assistant<|end_header_id|>
@@ -81,6 +78,7 @@ def summarize_answers(state):
     logger.info("---SUMMARIZING ANSWERS---")
     answers = state["answers"]
     summary_critics = state["summary_critics"]
+    input_data = state["input_data"]
     num_steps = int(state["num_steps"])
     num_steps += 1
     
@@ -95,7 +93,7 @@ def summarize_answers(state):
         Just answer with the summary in a non-technical way like you are talking to the common user.
 
         You can use this critics if present, to correct your output:
-        CRITICS: {summary_critics}
+        CRITICS: {summary_critics}\n
         <|eot_id|>
         <|start_header_id|>assistant<|end_header_id|>
         """,
@@ -125,12 +123,10 @@ def summarize_critics(state):
         You are an expert on critic a text and giving useful critical insights.
 
         <|eot_id|><|start_header_id|>user<|end_header_id|>
-        Given a SUMMARY on some ANSWERS, return a insightful critics to better the SUMMARY.
-
-        The SUMMARY must be in italian and should be easily readable by a non-technical user, and should focus more on the INPUT DATA implications.\n
+        Given a SUMMARY on some ANSWERS, return a insightful critics to better the SUMMARY, remind that the summary must be short and aknowledge the focus on the INPUT DATA.\n
 
         SUMMARY: {summary}\n
-        ANSWERS: {answers}
+        ANSWERS: {answers}\n
         INPUT DATA: {input_data}
         <|eot_id|>
         <|start_header_id|>assistant<|end_header_id|>

@@ -5,6 +5,7 @@ import pandas as pd
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.prompts import PromptTemplate
 
+from llm.langgraph.csv_user_question.llm_model import GROQ_LLM
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_community.tools import DuckDuckGoSearchResults
@@ -20,9 +21,6 @@ logging.basicConfig(level=logging.INFO,
                     datefmt='%Y-%m-%d %H:%M:%S')
 
 logger = logging.getLogger(__name__)
-GROQ_LLM = ChatGroq(
-            model="llama3-70b-8192", temperature=0
-        )
 
 def get_answer(state):
     """Answer the user question"""
