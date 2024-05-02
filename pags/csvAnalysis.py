@@ -59,7 +59,7 @@ def app():
                             graph_app = selection_builder()
 
                             # Graph inputs
-                            inputs = ({"df": df, "input_data": input_data, "num_steps": 0})
+                            inputs = ({"df": df, "input_data": input_data, "num_steps": 0, "critics_steps": 0})
 
                             # Run
                             res_analysis = graph_app.invoke(inputs)

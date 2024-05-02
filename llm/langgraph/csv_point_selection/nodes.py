@@ -80,6 +80,7 @@ def summarize_answers(state):
     """Summarize the given answers"""
     logger.info("---SUMMARIZING ANSWERS---")
     answers = state["answers"]
+    summary_critics = state["summary_critics"]
     num_steps = int(state["num_steps"])
     num_steps += 1
     
@@ -92,14 +93,53 @@ def summarize_answers(state):
 
         Summarize the whole answers in a very discorsive single paragraph without adding any preamble or introduction.
         Just answer with the summary in a non-technical way like you are talking to the common user.
+
+        You can use this critics if present, to correct your output:
+        CRITICS: {summary_critics}
         <|eot_id|>
         <|start_header_id|>assistant<|end_header_id|>
         """,
-        input_variables=["answers"],
+        input_variables=["answers", "summary_critics"],
     )
 
     summary_generator = prompt | GROQ_LLM | StrOutputParser()
-    summary = summary_generator.invoke({"answers": answers})
+    summary = summary_generator.invoke({"answers": answers, "summary_critics": summary_critics})
     logger.info(f"Generated questions: {summary}")
 
-    return ({"summary": summary, "num_steps": num_steps})
+    return ({"summary": summary, "num_steps": num_steps, "summary_critics": summary_critics})
+
+def summarize_critics(state):
+    """Give critical opinions on the summarization"""
+    logger.info("---SUMMARIZING ANSWERS---")
+    answers = state["answers"]
+    summary = state["summary"]
+    num_steps = int(state["num_steps"])
+    critics_steps = int(state["critics_steps"])
+    input_data = state["input_data"]
+
+    num_steps += 1
+    critics_steps += 1
+
+    prompt = PromptTemplate(
+    template="""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+        You are an expert on critic a text and giving useful critical insights.
+
+        <|eot_id|><|start_header_id|>user<|end_header_id|>
+        Given a SUMMARY on some ANSWERS, return a insightful critics to better the SUMMARY.
+
+        The SUMMARY must be in italian and should be easily readable by a non-technical user, and should focus more on the INPUT DATA implications.\n
+
+        SUMMARY: {summary}\n
+        ANSWERS: {answers}
+        INPUT DATA: {input_data}
+        <|eot_id|>
+        <|start_header_id|>assistant<|end_header_id|>
+        """,
+        input_variables=["answers", "summary", "input_data"],
+    )
+
+    critics_reflection = prompt | GROQ_LLM | StrOutputParser()
+    summary_critics = critics_reflection.invoke({"answers": answers, "summary": summary, "input_data": input_data})
+    logger.info(f"Generated questions: {summary_critics}")
+
+    return ({"num_steps": num_steps, "summary_critics": summary_critics, "critics_steps": critics_steps})

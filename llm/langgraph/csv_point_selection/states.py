@@ -19,6 +19,8 @@ class GraphState(TypedDict):
     df: pd.DataFrame
     input_data: str
     num_steps: int
+    critics_steps: int
     questions: str
     answers: str
     summary: str
+    summary_critics: str
