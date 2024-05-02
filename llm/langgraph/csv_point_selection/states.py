@@ -15,6 +15,8 @@ class GraphState(TypedDict):
         questions: A string representing questions that relate to the data.
         answers: A string representing answers related to the questions posed.
         summary: A string summarizing the key insights or results derived from the data.
+        summary_critics: A string giving a critical reviewon how to rewrite the summary.
+        critics_steps: An integer indicating the number of critical reviews given.
     """
     df: pd.DataFrame
     input_data: str
