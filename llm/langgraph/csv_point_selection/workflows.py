@@ -16,7 +16,6 @@ def schema_builder():
     # Edges
     workflow.add_edge("generate_questions", "questions_answering")
     workflow.add_edge("questions_answering", "summarize_answers")
-    workflow.add_edge("summarize_answers", END)
     workflow.add_edge("summarize_critics", "summarize_answers")
     workflow.add_conditional_edges(
             "summarize_answers",
