@@ -29,8 +29,8 @@ def generate_questions(state):
     <|eot_id|><|start_header_id|>user<|end_header_id|>
     Given the following dataframe: {df}\n
 
-    Write some questions that relate this values to the whole dataframe, no preamble or explanation:
-    \n{input_data}\n\n
+    Write 20 questions that focus on the INPUT DATA in relation to the whole dataframe ( correlations, meaningful insights ...), no preamble or explanation.
+    INPUT DATA:{input_data}\n\n
     <|eot_id|>
     <|start_header_id|>assistant<|end_header_id|>
     """,
@@ -91,7 +91,7 @@ def summarize_answers(state):
         ANSWERS: {answers}\n
 
         Summarize the whole answers in a very discorsive single paragraph without adding any preamble or introduction.
-        Just answer with the summary.
+        Just answer with the summary in a non-technical way like you are talking to the common user.
         <|eot_id|>
         <|start_header_id|>assistant<|end_header_id|>
         """,

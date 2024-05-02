@@ -92,7 +92,7 @@ def web_search(state):
     full_searches = []
     for keyword in keywords[:1]:
         print(keyword)
-        temp_docs = search.invoke(keyword)
+        temp_docs = search.run(keyword)
         web_results = "\n".join([d["content"] for d in temp_docs])
         web_results = Document(page_content=web_results)
         if full_searches is not None:
@@ -101,7 +101,6 @@ def web_search(state):
             full_searches = [web_results]
     print(full_searches)
     print(type(full_searches))
-    # write_markdown_file(full_searches, "research_info")
     return {"research_info": full_searches, "num_steps":num_steps}
 
 def rewrite_answer(state):
