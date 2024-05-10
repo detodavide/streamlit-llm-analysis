@@ -9,16 +9,11 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_community.tools import DuckDuckGoSearchResults
 from langchain.schema import Document
-from llm.langgraph.csv_user_question.llm_model import GROQ_LLM
+from llm.llm_model import LLM
 
 from langchain_groq import ChatGroq
 import logging
 from utils.logger import logger
-
-
-GROQ_LLM = ChatGroq(
-            model="llama3-70b-8192", temperature=0
-        )
 
 def route_to_research(state):
     """
@@ -56,7 +51,7 @@ def route_to_research(state):
         input_variables=["df","input_data", "question", "answer"],
     )
 
-    research_router = research_router_prompt | GROQ_LLM | JsonOutputParser()
+    research_router = research_router_prompt | LLM | JsonOutputParser()
 
 
     router = research_router.invoke({"df": df,"input_data": input_data, "question": question, "answer": answer })

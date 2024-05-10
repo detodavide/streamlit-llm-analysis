@@ -5,7 +5,7 @@ import pandas as pd
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.prompts import PromptTemplate
 
-from llm.langgraph.csv_user_question.llm_model import GROQ_LLM
+from llm.llm_model import LLM
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_community.tools import DuckDuckGoSearchResults
@@ -46,7 +46,7 @@ def get_answer(state):
         input_variables=["df", "input_data", "questions"],
     )
 
-    answer_generator = prompt | GROQ_LLM | StrOutputParser()
+    answer_generator = prompt | LLM | StrOutputParser()
     answer = answer_generator.invoke({"df": df, "input_data": input_data, "question": question})
     logger.info(f"Generated answer: {answer}")
 
@@ -81,7 +81,7 @@ def web_search(state):
         input_variables=["df","input_data", "question", "answer"],
     )
 
-    search_keyword_chain = search_keyword_prompt | GROQ_LLM | JsonOutputParser()
+    search_keyword_chain = search_keyword_prompt | LLM | JsonOutputParser()
     keywords = search_keyword_chain.invoke({"df": df, "input_data": input_data, "question": question, "answer": answer})
 
     keywords = keywords['keywords']
@@ -138,7 +138,7 @@ def rewrite_answer(state):
                         ],
     )
 
-    rewrite_chain = rewrite_answer_prompt | GROQ_LLM | StrOutputParser()
+    rewrite_chain = rewrite_answer_prompt | LLM | StrOutputParser()
 
     final_answer= rewrite_chain.invoke(
                                 {

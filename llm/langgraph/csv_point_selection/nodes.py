@@ -9,7 +9,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_groq import ChatGroq
 from utils.logger import logger
-from llm.langgraph.csv_point_selection.llm_model import GROQ_LLM
+from llm.llm_model import LLM
 
 def generate_questions(state):   
     """Take the initial df and input_data to generate the questions based on the data"""
@@ -34,7 +34,7 @@ def generate_questions(state):
     input_variables=["df", "input_data"],
     )
 
-    questions_generator = prompt | GROQ_LLM | StrOutputParser()
+    questions_generator = prompt | LLM | StrOutputParser()
     questions = questions_generator.invoke({"df": df, "input_data": input_data})
 
     questions = extract_questions(questions)
@@ -67,7 +67,7 @@ def questions_answering(state):
         input_variables=["df", "input_data", "questions"],
     )
 
-    answers_generator = prompt | GROQ_LLM | StrOutputParser()
+    answers_generator = prompt | LLM | StrOutputParser()
     answers = answers_generator.invoke({"df": df, "input_data": input_data, "questions": questions})
     logger.info(f"Generated answers: {answers}")
 
@@ -100,7 +100,7 @@ def summarize_answers(state):
         input_variables=["answers", "summary_critics"],
     )
 
-    summary_generator = prompt | GROQ_LLM | StrOutputParser()
+    summary_generator = prompt | LLM | StrOutputParser()
     summary = summary_generator.invoke({"answers": answers, "summary_critics": summary_critics})
     logger.info(f"Generated questions: {summary}")
 
@@ -134,7 +134,7 @@ def summarize_critics(state):
         input_variables=["answers", "summary", "input_data"],
     )
 
-    critics_reflection = prompt | GROQ_LLM | StrOutputParser()
+    critics_reflection = prompt | LLM | StrOutputParser()
     summary_critics = critics_reflection.invoke({"answers": answers, "summary": summary, "input_data": input_data})
     logger.info(f"Generated questions: {summary_critics}")
 
