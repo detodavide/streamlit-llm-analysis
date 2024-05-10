@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  ollama:
+    build:
+      context: "../dockerfiles/"
+      dockerfile: ollama.DockerFile
+    ports:
+      - "11434:11434"
+    volumes:
+      - data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  data:
