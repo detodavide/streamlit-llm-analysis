@@ -9,11 +9,12 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_community.tools import DuckDuckGoSearchResults
 from langchain.schema import Document
-from llm.llm_model import LLM
 
 from langchain_groq import ChatGroq
 import logging
 from utils.logger import logger
+
+LLM=ChatGroq(model="llama3:70b", temperature=0.0)
 
 def route_to_research(state):
     """

@@ -9,9 +9,8 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_groq import ChatGroq
 from utils.logger import logger
-from llm.llm_model import LLM
 
-def generate_questions(state):   
+def generate_questions(state, llm):   
     """Take the initial df and input_data to generate the questions based on the data"""
     logger.info("---GENERATING THE QUESTIONS---")
     df = state["df"]
@@ -34,7 +33,7 @@ def generate_questions(state):
     input_variables=["df", "input_data"],
     )
 
-    questions_generator = prompt | LLM | StrOutputParser()
+    questions_generator = prompt | llm | StrOutputParser()
     questions = questions_generator.invoke({"df": df, "input_data": input_data})
 
     questions = extract_questions(questions)
@@ -42,7 +41,7 @@ def generate_questions(state):
 
     return ({"questions": questions, "num_steps": num_steps})
 
-def questions_answering(state):
+def questions_answering(state, llm):
     """Given any number of questions answer them"""
     logger.info("---ANSWERING QUESTIONS---")
     df = state["df"]
@@ -67,13 +66,13 @@ def questions_answering(state):
         input_variables=["df", "input_data", "questions"],
     )
 
-    answers_generator = prompt | LLM | StrOutputParser()
+    answers_generator = prompt | llm | StrOutputParser()
     answers = answers_generator.invoke({"df": df, "input_data": input_data, "questions": questions})
     logger.info(f"Generated answers: {answers}")
 
     return ({"answers": answers, "num_steps": num_steps})
 
-def summarize_answers(state):
+def summarize_answers(state,llm):
     """Summarize the given answers"""
     logger.info("---SUMMARIZING ANSWERS---")
     answers = state["answers"]
@@ -100,13 +99,13 @@ def summarize_answers(state):
         input_variables=["answers", "summary_critics"],
     )
 
-    summary_generator = prompt | LLM | StrOutputParser()
+    summary_generator = prompt | llm | StrOutputParser()
     summary = summary_generator.invoke({"answers": answers, "summary_critics": summary_critics})
     logger.info(f"Generated questions: {summary}")
 
     return ({"summary": summary, "num_steps": num_steps, "summary_critics": summary_critics})
 
-def summarize_critics(state):
+def summarize_critics(state, llm):
     """Give critical opinions on the summarization"""
     logger.info("---SUMMARIZING ANSWERS---")
     answers = state["answers"]
@@ -134,7 +133,7 @@ def summarize_critics(state):
         input_variables=["answers", "summary", "input_data"],
     )
 
-    critics_reflection = prompt | LLM | StrOutputParser()
+    critics_reflection = prompt | llm | StrOutputParser()
     summary_critics = critics_reflection.invoke({"answers": answers, "summary": summary, "input_data": input_data})
     logger.info(f"Generated questions: {summary_critics}")
 
