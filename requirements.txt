@@ -4,3 +4,5 @@ langchain_openai
 langchain_groq
 langchain_experimental
 langgraph
+pydantic
+typing_extensions

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ValidationError
 from langchain_groq import ChatGroq
 from langchain_openai import ChatOpenAI
-from langchain_community.llms import Ollama
+from langchain_community.chat_models import ChatOllama
 import json
 
 class LLMConfig(BaseModel):
@@ -21,7 +21,7 @@ def get_llm():
     if config.llm_provider == 'Groq':
         return ChatGroq(model=config.model, temperature=config.temperature)
     elif config.llm_provider == 'Ollama':
-        return Ollama(model=config.model, temperature=config.temperature)
+        return ChatOllama(model=config.model, temperature=config.temperature)
     elif config.llm_provider == 'OpenAI':
         return ChatOpenAI(model=config.model, temperature=config.temperature)
 
