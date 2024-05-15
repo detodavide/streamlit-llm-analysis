@@ -22,9 +22,7 @@ logging.basicConfig(level=logging.INFO,
 
 logger = logging.getLogger(__name__)
 
-LLM=ChatGroq(model="llama3:70b", temperature=0.0)
-
-def get_answer(state):
+def get_answer(state, llm):
     """Answer the user question"""
     logger.info("---ANSWERING QUESTIONS---")
     df = state["df"]
@@ -36,6 +34,7 @@ def get_answer(state):
     prompt = PromptTemplate(
     template="""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
         You are a Data Analyst expert that is able to find meaningful insights answering the user questions about data.
+        The answer must be in italian.
 
         <|eot_id|><|start_header_id|>user<|end_header_id|>
         DATAFRAME: {df}\n
@@ -48,13 +47,13 @@ def get_answer(state):
         input_variables=["df", "input_data", "questions"],
     )
 
-    answer_generator = prompt | LLM | StrOutputParser()
+    answer_generator = prompt | llm | StrOutputParser()
     answer = answer_generator.invoke({"df": df, "input_data": input_data, "question": question})
     logger.info(f"Generated answer: {answer}")
 
     return ({"answer": answer, "num_steps": num_steps})
 
-def web_search(state):
+def web_search(state, llm):
     """Search for more info based on the found keyword"""
     logger.info("---WEB SEARCH---")
     df = state["df"]
@@ -83,7 +82,7 @@ def web_search(state):
         input_variables=["df","input_data", "question", "answer"],
     )
 
-    search_keyword_chain = search_keyword_prompt | LLM | JsonOutputParser()
+    search_keyword_chain = search_keyword_prompt | llm | JsonOutputParser()
     keywords = search_keyword_chain.invoke({"df": df, "input_data": input_data, "question": question, "answer": answer})
 
     keywords = keywords['keywords']
@@ -103,7 +102,7 @@ def web_search(state):
     print(type(full_searches))
     return {"research_info": full_searches, "num_steps":num_steps}
 
-def rewrite_answer(state):
+def rewrite_answer(state, llm):
     """Rewrite the answer using the given data"""
     logger.info("---REWRITING THE FINAL ANSWER---")
     df = state["df"]
@@ -116,14 +115,7 @@ def rewrite_answer(state):
 
     rewrite_answer_prompt = PromptTemplate(
     template="""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
-        You are the Final Answer Agent read the answer from answering agent \
-        and use it to rewrite and improve the answer to create a final answer.
-
-
-        You never make up or add information that hasn't been provided by the research_info or in the df and input data.
-
-        Return the final answer as a string and no preamble or explanation.
-        The answer should be easily readable from the general user, so dont write code or technical details.
+        You are the Final Answer Agent read the ANSWER from answering agent and provide a simple summary in italian.
 
         <|eot_id|><|start_header_id|>user<|end_header_id|>
         DATAFRAME: {df} \n\n
@@ -140,7 +132,7 @@ def rewrite_answer(state):
                         ],
     )
 
-    rewrite_chain = rewrite_answer_prompt | LLM | StrOutputParser()
+    rewrite_chain = rewrite_answer_prompt | llm | StrOutputParser()
 
     final_answer= rewrite_chain.invoke(
                                 {

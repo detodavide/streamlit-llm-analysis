@@ -14,9 +14,7 @@ from langchain_groq import ChatGroq
 import logging
 from utils.logger import logger
 
-LLM=ChatGroq(model="llama3:70b", temperature=0.0)
-
-def route_to_research(state):
+def route_to_research(state, llm):
     """
     Route question and answer to web search or not.
     Args:
@@ -52,7 +50,7 @@ def route_to_research(state):
         input_variables=["df","input_data", "question", "answer"],
     )
 
-    research_router = research_router_prompt | LLM | JsonOutputParser()
+    research_router = research_router_prompt | llm | JsonOutputParser()
 
 
     router = research_router.invoke({"df": df,"input_data": input_data, "question": question, "answer": answer })

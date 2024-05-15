@@ -93,7 +93,7 @@ def app():
                         if chat:
 
                             # Compile the graph
-                            graph_app = question_builder()
+                            graph_app = question_builder(llm=LLM)
 
                             # Graph inputs
                             inputs = ({"df": df, "input_data": input_data, "question": chat, "num_steps": 0})

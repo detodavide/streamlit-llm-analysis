@@ -19,7 +19,7 @@ def schema_builder(llm):
     workflow.add_edge("summarize_critics", "summarize_answers")
     workflow.add_conditional_edges(
             "summarize_answers",
-            summary_reflection_router
+            lambda state: summary_reflection_router(state, llm)
         )
     
     # Entrypoint
