@@ -171,3 +171,44 @@ def summarize_critics(state, llm: ChatGroq | ChatOllama | ChatOpenAI):
     logger.info(f"Generated questions: {summary_critics}")
 
     return ({"num_steps": num_steps, "summary_critics": summary_critics, "critics_steps": critics_steps})
+
+
+def one_shot_node(state, llm: ChatGroq | ChatOllama | ChatOpenAI):
+    """Given some df info and an input data give insight about the data."""
+    logger.info("---ONE SHOT DATA---")
+
+    df: pd.DataFrame = state["df"]
+    df_info = {"df.describe()":df.describe(), "df.info()":df.info()}
+    input_data = state["input_data"]
+    num_steps = int(state["num_steps"])
+    num_steps += 1
+
+    system_template = """You are a Data Analyst expert that is a master on analyze data and return it in italian only."""
+    user_template ="""Given the following instructions:
+    
+    - DATAFRAME: {df}\n
+    - DATAFRAME_INFO: {df_info}\n
+    - INPUT DATA:{input_data}\n\n
+    
+    I want you to focus on the INPUT DATA and give informations on INPUT DATA finding some useful insights based on the given DATAFRAME and DATAFRAME_INFO.
+    Write a short single paragraph."""
+
+    if isinstance(llm, (ChatGroq, ChatOllama)):      
+        prompt = PromptTemplate(
+            input_variables=["df", "input_data", "df_info"],
+            template=TEMPLATE_1.format(
+                system_prompt=system_template,
+                user_prompt=user_template
+            )
+        )
+    if isinstance(llm, ChatOpenAI):
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", system_template),
+                ("human", user_template),
+            ]
+        )
+
+    one_shot_chain = prompt | llm | StrOutputParser()
+    answers = one_shot_chain.invoke({"df": df, "input_data": input_data, "df_info": df_info})
+    return ({"summary": answers})

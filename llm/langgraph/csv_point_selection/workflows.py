@@ -1,5 +1,5 @@
 from langgraph.graph import StateGraph, END
-from llm.langgraph.csv_point_selection.states import GraphState as CPSGraphState
+from llm.langgraph.csv_point_selection.states import GraphState as CPSGraphState, OneShotGraph
 from llm.langgraph.csv_point_selection.nodes import *
 from llm.langgraph.csv_point_selection.conditional_edges import *
 from langchain_groq import ChatGroq
@@ -7,7 +7,7 @@ from langchain_openai import ChatOpenAI
 from langchain_community.chat_models import ChatOllama
 
 # Init Graph
-def schema_builder(llm: ChatGroq | ChatOllama | ChatOpenAI):
+def full_node_schema(llm: ChatGroq | ChatOllama | ChatOpenAI):
     workflow = StateGraph(CPSGraphState)
 
     # Nodes
@@ -29,5 +29,16 @@ def schema_builder(llm: ChatGroq | ChatOllama | ChatOpenAI):
     workflow.set_entry_point("generate_questions")
 
     # Build the graph
+    app = workflow.compile()
+    return app
+
+def short_node_schema(llm: ChatGroq | ChatOllama | ChatOpenAI):
+    workflow = StateGraph(OneShotGraph)
+
+    workflow.add_node("one_shot_node", lambda state: one_shot_node(state, llm))
+    workflow.add_edge("one_shot_node", END)
+
+    workflow.set_entry_point("one_shot_node")
+
     app = workflow.compile()
     return app

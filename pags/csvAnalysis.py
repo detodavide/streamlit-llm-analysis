@@ -1,9 +1,10 @@
 import streamlit as st
 import pandas as pd
+from pandas.core.series import Series
 import plotly.express as px
 from pandasai import SmartDataframe
 from pandasai.llm import OpenAI
-from llm.langgraph.csv_point_selection.workflows import schema_builder as selection_builder
+from llm.langgraph.csv_point_selection.workflows import full_node_schema, short_node_schema
 from llm.langgraph.csv_user_question.workflows import schema_builder as question_builder
 from llm.llm_model import get_ollama_models, get_llm, LLMConfig, get_openai_models
 
@@ -31,7 +32,7 @@ def get_llm_model(provider: str):
         model = st.selectbox("Select Local model", models)
     else:
         model=None
-        
+
     config=LLMConfig(llm_provider=provider, model=model)
     LLM = get_llm(config)
     return LLM
@@ -79,13 +80,15 @@ def app():
 
                     with bot_message:
                         data = event_data.select["points"][0]
-                        input_data = f"- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}"
-                        st.write(input_data)
+                        input_data: Series = df.iloc[event_data['select']['points'][0]['point_index']]
+                        # input_data = f"- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}"
+                        transposed_input = input_data.to_frame().T
+                        st.dataframe(transposed_input)
 
                         if event_data and not chat:
                             
                             # Compile the graph
-                            graph_app = selection_builder(llm=LLM)
+                            graph_app = short_node_schema(llm=LLM)
 
                             # Graph inputs
                             inputs = ({"df": df, "input_data": input_data, "num_steps": 0, "critics_steps": 0})

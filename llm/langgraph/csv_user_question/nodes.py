@@ -87,10 +87,8 @@ def web_search(state, llm):
 
     keywords = keywords['keywords']
     search = DuckDuckGoSearchResults()
-    # print(keywords)
     full_searches = []
     for keyword in keywords[:1]:
-        print(keyword)
         temp_docs = search.run(keyword)
         web_results = "\n".join([d["content"] for d in temp_docs])
         web_results = Document(page_content=web_results)
@@ -98,8 +96,6 @@ def web_search(state, llm):
             full_searches.append(web_results)
         else:
             full_searches = [web_results]
-    print(full_searches)
-    print(type(full_searches))
     return {"research_info": full_searches, "num_steps":num_steps}
 
 def rewrite_answer(state, llm):

@@ -19,10 +19,18 @@ class GraphState(TypedDict):
         critics_steps: An integer indicating the number of critical reviews given.
     """
     df: pd.DataFrame
-    input_data: str
+    input_data: pd.Series
     num_steps: int
     critics_steps: int
     questions: str
     answers: str
     summary: str
     summary_critics: str
+
+class OneShotGraph(TypedDict):
+    df: pd.DataFrame
+    input_data: pd.Series
+    num_steps: int
+    summary: str
+    critics_steps: int
+    df_info: dict
