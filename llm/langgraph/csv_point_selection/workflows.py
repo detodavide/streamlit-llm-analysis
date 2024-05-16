@@ -2,9 +2,12 @@ from langgraph.graph import StateGraph, END
 from llm.langgraph.csv_point_selection.states import GraphState as CPSGraphState
 from llm.langgraph.csv_point_selection.nodes import *
 from llm.langgraph.csv_point_selection.conditional_edges import *
+from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
+from langchain_community.chat_models import ChatOllama
 
 # Init Graph
-def schema_builder(llm):
+def schema_builder(llm: ChatGroq | ChatOllama | ChatOpenAI):
     workflow = StateGraph(CPSGraphState)
 
     # Nodes

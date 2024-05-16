@@ -20,10 +20,12 @@ def get_llm(llm_config: Optional[LLMConfig]):
         return ChatGroq(model="llama3-70b-8192", temperature=llm_config.temperature)
     elif llm_config.llm_provider == 'Ollama':
         return ChatOllama(base_url=os.getenv("OLLAMA_HOST"), model=llm_config.model, temperature=llm_config.temperature)
-    # Al momento i prompt sono solo per llama3
-    # elif llm_config.llm_provider == 'OpenAI':
-    #     return ChatOpenAI(model="gpt3.5-turbo", temperature=llm_config.temperature)
+    elif llm_config.llm_provider == 'OpenAI':
+        return ChatOpenAI(model="gpt-4o", temperature=llm_config.temperature)
 
 def get_ollama_models():
     model_dict = ollama.list()
     return [model["name"] for model in model_dict["models"]]
+
+def get_openai_models():
+    return ["gpt-3.5-turbo", "gpt-4-turbo", "gpt-4o"]

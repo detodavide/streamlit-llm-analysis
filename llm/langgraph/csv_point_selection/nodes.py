@@ -8,10 +8,13 @@ from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
+from langchain_community.chat_models import ChatOllama
 from utils.logger import logger
 from llm.templates.llama_templates import TEMPLATE_1
+import groq.resources.chat.completions
 
-def generate_questions(state, llm):   
+def generate_questions(state, llm: ChatGroq | ChatOllama | ChatOpenAI):   
     """Take the initial df and input_data to generate the questions based on the data"""
     logger.info("---GENERATING THE QUESTIONS---")
     df = state["df"]
@@ -24,16 +27,23 @@ def generate_questions(state, llm):
         Write 20 questions that focus on the INPUT DATA in relation to the whole dataframe ( correlations, meaningful insights ...), no preamble or explanation.
 
         INPUT DATA:{input_data}\n\n"""
-    
-    prompt = PromptTemplate(
-        input_variables=["df", "input_data"],
-        template=TEMPLATE_1.format(
-            system_prompt=system_template,
-            user_prompt=user_template
-        )
-    )
 
-    print(prompt)
+    if isinstance(llm, (ChatGroq, ChatOllama)):      
+        prompt = PromptTemplate(
+            input_variables=["df", "input_data"],
+            template=TEMPLATE_1.format(
+                system_prompt=system_template,
+                user_prompt=user_template
+            )
+        )
+    if isinstance(llm, ChatOpenAI):
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", system_template),
+                ("human", user_template),
+            ]
+        )
+
     questions_generator = prompt | llm | StrOutputParser()
     questions = questions_generator.invoke({"df": df, "input_data": input_data})
 
@@ -42,7 +52,7 @@ def generate_questions(state, llm):
 
     return ({"questions": questions, "num_steps": num_steps})
 
-def questions_answering(state, llm):
+def questions_answering(state, llm: ChatGroq | ChatOllama | ChatOpenAI):
     """Given any number of questions answer them"""
     logger.info("---ANSWERING QUESTIONS---")
     df = state["df"]
@@ -59,21 +69,29 @@ def questions_answering(state, llm):
 
         Answer each questions giving a proper analysis and explanation on how the INPUT DATA compares to the whole DATAFRAME, giving a strong focues on the INPUT DATA."""
     
-    prompt = PromptTemplate(
-        template=TEMPLATE_1.format(
-            system_prompt=system_template,
-            user_prompt=user_template
-        ),
-        input_variables=["df", "input_data", "questions"],
-    )
-    print(prompt)
+    if isinstance(llm, (ChatGroq, ChatOllama)):      
+        prompt = PromptTemplate(
+            input_variables=["df", "input_data", "questions"],
+            template=TEMPLATE_1.format(
+                system_prompt=system_template,
+                user_prompt=user_template
+            )
+        )
+    if isinstance(llm, ChatOpenAI):
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", system_template),
+                ("human", user_template),
+            ]
+        )
+
     answers_generator = prompt | llm | StrOutputParser()
     answers = answers_generator.invoke({"df": df, "input_data": input_data, "questions": questions})
     logger.info(f"Generated answers: {answers}")
 
     return ({"answers": answers, "num_steps": num_steps})
 
-def summarize_answers(state,llm):
+def summarize_answers(state, llm: ChatGroq | ChatOllama | ChatOpenAI):
     """Summarize the given answers"""
     logger.info("---SUMMARIZING ANSWERS---")
     answers = state["answers"]
@@ -91,13 +109,21 @@ def summarize_answers(state,llm):
         You can use this critics if present, to correct your output:
         CRITICS: {summary_critics}\n"""
 
-    prompt = PromptTemplate(
-        template=TEMPLATE_1.format(
-            system_prompt=system_template,
-            user_prompt=user_template
-        ),
-        input_variables=["answers", "summary_critics"],
-    )
+    if isinstance(llm, (ChatGroq, ChatOllama)):      
+        prompt = PromptTemplate(
+            input_variables=["answers", "summary_critics"],
+            template=TEMPLATE_1.format(
+                system_prompt=system_template,
+                user_prompt=user_template
+            )
+        )
+    if isinstance(llm, ChatOpenAI):
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", system_template),
+                ("human", user_template),
+            ]
+        )
 
     summary_generator = prompt | llm | StrOutputParser()
     summary = summary_generator.invoke({"answers": answers, "summary_critics": summary_critics})
@@ -105,7 +131,7 @@ def summarize_answers(state,llm):
 
     return ({"summary": summary, "num_steps": num_steps, "summary_critics": summary_critics})
 
-def summarize_critics(state, llm):
+def summarize_critics(state, llm: ChatGroq | ChatOllama | ChatOpenAI):
     """Give critical opinions on the summarization"""
     logger.info("---SUMMARIZING ANSWERS---")
     answers = state["answers"]
@@ -124,13 +150,21 @@ def summarize_critics(state, llm):
         ANSWERS: {answers}\n
         INPUT DATA: {input_data}"""
 
-    prompt = PromptTemplate(
-        template=TEMPLATE_1.format(
-            system_prompt=system_template,
-            user_prompt=user_template
-        ),
-        input_variables=["answers", "summary", "input_data"],
-    )
+    if isinstance(llm, (ChatGroq, ChatOllama)):      
+        prompt = PromptTemplate(
+            input_variables=["df", "input_data"],
+            template=TEMPLATE_1.format(
+                system_prompt=system_template,
+                user_prompt=user_template
+            )
+        )
+    if isinstance(llm, ChatOpenAI):
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", system_template),
+                ("human", user_template),
+            ]
+        )
 
     critics_reflection = prompt | llm | StrOutputParser()
     summary_critics = critics_reflection.invoke({"answers": answers, "summary": summary, "input_data": input_data})

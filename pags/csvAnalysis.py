@@ -5,7 +5,7 @@ from pandasai import SmartDataframe
 from pandasai.llm import OpenAI
 from llm.langgraph.csv_point_selection.workflows import schema_builder as selection_builder
 from llm.langgraph.csv_user_question.workflows import schema_builder as question_builder
-from llm.llm_model import get_ollama_models, get_llm, LLMConfig
+from llm.llm_model import get_ollama_models, get_llm, LLMConfig, get_openai_models
 
 from dotenv import load_dotenv,find_dotenv
 load_dotenv(find_dotenv())
@@ -24,16 +24,20 @@ def call_pandas_agent(df):
 
 def get_llm_model(provider: str):
     if provider == "Ollama":
-        local_models = get_ollama_models()
-        model = st.selectbox("Select Local model", local_models)
-        config = LLMConfig(llm_provider=provider, model=model)
+        models = get_ollama_models()
+        model = st.selectbox("Select Local model", models)
+    elif provider == "OpenAI":
+        models = get_openai_models()
+        model = st.selectbox("Select Local model", models)
     else:
-        config=LLMConfig(llm_provider=provider, model=None)
+        model=None
+        
+    config=LLMConfig(llm_provider=provider, model=model)
     LLM = get_llm(config)
     return LLM
 
 def get_llm_provider():
-    providers = ["Groq", "Ollama"]
+    providers = ["Groq", "Ollama", "OpenAI"]
     provider = st.selectbox("Select LLM Provider", providers)
     return provider
 
