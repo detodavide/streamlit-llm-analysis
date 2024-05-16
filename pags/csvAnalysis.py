@@ -54,17 +54,21 @@ def app():
     uploaded_file = st.file_uploader("Upload CSV or XLSX file", type=["csv", "xlsx"])
     if uploaded_file is not None:
         df = load_data(uploaded_file)
-        st.dataframe(df)
+        df['id'] = df.index
+        columns = ['id'] + [col for col in df.columns if col != 'id']
+        df = df[columns]
+        st.dataframe(df, hide_index=True)
 
 
         if df is not None:
-            column_options = df.columns.tolist()
-            x = st.selectbox('Select x-axis for scatter plot:', column_options, index=column_options.index('total_bill') if 'total_bill' in column_options else 0)
-            y = st.selectbox('Select y-axis for scatter plot:', column_options, index=column_options.index('tip') if 'tip' in column_options else 0)
-            color = st.selectbox('Select color dimension:', column_options, index=column_options.index('day') if 'day' in column_options else 0)
+            column_options = [col for col in df.columns if col != 'id']
+            x = st.selectbox('Select x-axis for scatter plot:', column_options)
+            y = st.selectbox('Select y-axis for scatter plot:', column_options)
+            color = st.selectbox('Select color dimension:', column_options)
+            size = st.selectbox('Select size dimension:', column_options)
 
-            fig = px.scatter(df, x=x, y=y, color=color, title=f"Scatter Plot of {x} vs {y}, Colored by {color}")
-            event_data = st.plotly_chart(fig, on_select="rerun")
+            fig = px.scatter(df, x=x, y=y, color=color, size=size, hover_data=df.columns, title=f"Scatter Plot of {x} vs {y}, Colored by {color}")
+            event_data = st.plotly_chart(fig, on_select="rerun", use_container_width=True)
 
             ai_assistant = st.checkbox("Check to start the AI Assistant (WARNING: Be careful, checking this will start the API call to the llm)")
 
@@ -79,9 +83,8 @@ def app():
                         chat = st.chat_input("Ask a question about the data")
 
                     with bot_message:
-                        data = event_data.select["points"][0]
-                        input_data: Series = df.iloc[event_data['select']['points'][0]['point_index']]
-                        # input_data = f"- {x}: {data['x']}\n- {y}: {data['y']}\n- {color}: {data['legendgroup']}"
+                        print(event_data['select'])
+                        input_data: Series = df.iloc[event_data['select']['points'][0]['customdata'][0]]
                         transposed_input = input_data.to_frame().T
                         st.dataframe(transposed_input)
 
