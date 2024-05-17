@@ -57,8 +57,18 @@ def app():
         df['id'] = df.index
         columns = ['id'] + [col for col in df.columns if col != 'id']
         df = df[columns]
-        st.dataframe(df, hide_index=True)
 
+        conversion_errors = []
+        for col in df.columns:
+            if df[col].dtype == 'object':
+                df[col] = df[col].str.replace(',', '')  
+            try:
+                df[col] = df[col].astype(float)
+            except ValueError:
+                conversion_errors.append(col)
+
+        # Display the dataframe and info
+        st.dataframe(df, hide_index=True)
 
         if df is not None:
             column_options = [col for col in df.columns if col != 'id']

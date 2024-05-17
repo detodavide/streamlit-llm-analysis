@@ -1,18 +1,14 @@
 from utils.extract_quetions import extract_questions
-from typing_extensions import TypedDict
-from typing import List
 import pandas as pd
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.prompts import PromptTemplate
 
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.output_parsers import JsonOutputParser
 from langchain_groq import ChatGroq
 from langchain_openai import ChatOpenAI
 from langchain_community.chat_models import ChatOllama
 from utils.logger import logger
 from llm.templates.llama_templates import TEMPLATE_1
-import groq.resources.chat.completions
 
 def generate_questions(state, llm: ChatGroq | ChatOllama | ChatOpenAI):   
     """Take the initial df and input_data to generate the questions based on the data"""
@@ -186,16 +182,15 @@ def one_shot_node(state, llm: ChatGroq | ChatOllama | ChatOpenAI):
     system_template = """You are a Data Analyst expert that is a master on analyze data and return it in italian only."""
     user_template ="""Given the following instructions:
     
-    - DATAFRAME: {df}\n
     - DATAFRAME_INFO: {df_info}\n
     - INPUT DATA:{input_data}\n\n
     
-    I want you to focus on the INPUT DATA and give informations on INPUT DATA finding some useful insights based on the given DATAFRAME and DATAFRAME_INFO.
-    Write a short single paragraph."""
+    I want you to focus on the INPUT DATA and give informations on INPUT DATA finding some useful insights based on the given DATAFRAME_INFO.
+    Write a single paragraph."""
 
     if isinstance(llm, (ChatGroq, ChatOllama)):      
         prompt = PromptTemplate(
-            input_variables=["df", "input_data", "df_info"],
+            input_variables=["input_data", "df_info"],
             template=TEMPLATE_1.format(
                 system_prompt=system_template,
                 user_prompt=user_template
@@ -210,5 +205,5 @@ def one_shot_node(state, llm: ChatGroq | ChatOllama | ChatOpenAI):
         )
 
     one_shot_chain = prompt | llm | StrOutputParser()
-    answers = one_shot_chain.invoke({"df": df, "input_data": input_data, "df_info": df_info})
+    answers = one_shot_chain.invoke({"input_data": input_data, "df_info": df_info})
     return ({"summary": answers})
