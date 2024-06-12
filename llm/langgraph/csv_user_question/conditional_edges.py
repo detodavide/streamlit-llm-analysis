@@ -9,13 +9,12 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_community.tools import DuckDuckGoSearchResults
 from langchain.schema import Document
-from llm.llm_model import LLM
 
 from langchain_groq import ChatGroq
 import logging
 from utils.logger import logger
 
-def route_to_research(state):
+def route_to_research(state, llm):
     """
     Route question and answer to web search or not.
     Args:
@@ -51,7 +50,7 @@ def route_to_research(state):
         input_variables=["df","input_data", "question", "answer"],
     )
 
-    research_router = research_router_prompt | LLM | JsonOutputParser()
+    research_router = research_router_prompt | llm | JsonOutputParser()
 
 
     router = research_router.invoke({"df": df,"input_data": input_data, "question": question, "answer": answer })
