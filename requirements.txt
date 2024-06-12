@@ -6,3 +6,5 @@ langchain_experimental
 langgraph
 pydantic
 typing_extensions
+joblib
+llama_parse

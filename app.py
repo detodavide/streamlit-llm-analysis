@@ -1,9 +1,9 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-import pags.csvAnalysis, pags.webSearch
+import pags.csvAnalysis, pags.pdfReader
 
 st.set_page_config(
-    page_title="AI on steroids"
+    page_title="AI"
 )
 
 class MultiApp:
@@ -20,7 +20,7 @@ class MultiApp:
         with st.sidebar:
             app = option_menu(
                 menu_title="Table of Content",
-                options=['CSV Analysis', "Web Search"],
+                options=['CSV Analysis', "PDF Reader"],
                 default_index=1,
                 styles={
                 "container": {"padding": "4!important","background-color":'black'},
@@ -31,7 +31,7 @@ class MultiApp:
             )
         if app == "CSV Analysis":
             pags.csvAnalysis.app()
-        if app == "Web Search":
-            pags.webSearch.app()  
+        if app == "PDF Reader":
+            pags.pdfReader.app()  
 
     run()      
