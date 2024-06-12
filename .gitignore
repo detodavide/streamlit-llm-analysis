@@ -6,3 +6,5 @@ pandasai.log
 exports/
 cache/
 *.txt
+/data
+/chromadb1

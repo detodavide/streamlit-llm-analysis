@@ -8,3 +8,7 @@ pydantic
 typing_extensions
 joblib
 llama_parse
+unstructured
+unstructured[md]
+fastembed
+chromadb
