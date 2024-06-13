@@ -58,7 +58,7 @@ def create_vector_database(llama_parse_documents, uploaded_file):
     markdown_path = f"data/{uploaded_file.name.split('.')[0]}.md"
     file_name: str = uploaded_file.name.split('.')[0]
 
-    with open(markdown_path, 'a', encoding='utf-8') as f:  # Open the file in append mode ('a')
+    with open(markdown_path, 'w', encoding='utf-8') as f:  # Open the file in append mode ('a')
         for doc in llama_parse_documents:
             f.write(doc.text + '\n')
     
@@ -74,21 +74,12 @@ def create_vector_database(llama_parse_documents, uploaded_file):
     # Initialize Embeddings
     embeddings = FastEmbedEmbeddings(model_name="BAAI/bge-base-en-v1.5")
 
-    # Create and persist a Chroma vector database from the chunked documents in batches
-    # batch_size = 50
-    # for i in range(0, len(docs), batch_size):
-    #     batch_docs = docs[i:i+batch_size]
-    #     vectorstore = Chroma.from_documents(
-    #         documents=batch_docs,
-    #         embedding=embeddings,
-    #         persist_directory="./chromadb1",
-    #         collection_name="full_documents"
-    #     )
-
-    # vectorstore = Chroma(persist_directory="./chromadb1", collection_name="full_documents", embedding_function=embeddings)
+    # IF it crash use the batch add chunks
+    # vectorstore = Chroma(persist_directory="./chromadb1", collection_name=f"{file_name}", embedding_function=embeddings)
 
     # batch_size = 50
     # for i in range(0, len(docs), batch_size):
+    #     print(f"Adding batch of chunks from {i} to {i+batch_size}")
     #     batch_docs = docs[i:i+batch_size]
     #     vectorstore.add_documents(documents=batch_docs)
 
