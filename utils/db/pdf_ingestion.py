@@ -33,9 +33,9 @@ def load_or_parse_data(uploaded_file):
         parser = LlamaParse(api_key=os.getenv("LLAMA_PARSE_API_KEY"), result_type="markdown", parsing_instruction=parsingInstructionUber10k)
         
         # Load data from the uploaded PDF file
-        with open(uploaded_file.name, "wb") as f:
+        with open(f"pdfs/{uploaded_file.name}", "wb") as f:
             f.write(uploaded_file.getbuffer())
-        llama_parse_documents = parser.load_data(uploaded_file.name)
+        llama_parse_documents = parser.load_data(f"pdfs/{uploaded_file.name}")
         
         # Save the parsed data to a file
         joblib.dump(llama_parse_documents, data_file)
