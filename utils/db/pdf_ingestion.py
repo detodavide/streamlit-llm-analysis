@@ -6,6 +6,12 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
 from langchain_community.document_loaders import UnstructuredMarkdownLoader
 from langchain_community.vectorstores import Chroma
+from llm.llm_model import get_llm, LLMConfig
+from langchain.prompts import PromptTemplate
+from langchain.chains.retrieval_qa.base import RetrievalQA
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings.sentence_transformer import SentenceTransformerEmbeddings
+
 
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
@@ -50,8 +56,6 @@ def create_vector_database(llama_parse_documents):
     and finally persists the embeddings into a Chroma vector database.
 
     """
-    # Call the function to either load or parse the data
-    print(llama_parse_documents[0].text[:100])
     
     with open('data/output.md', 'a', encoding='utf-8') as f:  # Open the file in append mode ('a')
         for doc in llama_parse_documents:
@@ -62,7 +66,7 @@ def create_vector_database(llama_parse_documents):
 
     documents = loader.load()
     # Split loaded documents into chunks
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=100)
     docs = text_splitter.split_documents(documents)
     print(f"length of documents loaded: {len(documents)}")
     print(f"total number of document chunks generated :{len(docs)}")
@@ -71,22 +75,72 @@ def create_vector_database(llama_parse_documents):
     embeddings = FastEmbedEmbeddings(model_name="BAAI/bge-base-en-v1.5")
 
     # Create and persist a Chroma vector database from the chunked documents in batches
-    batch_size = 50
-    for i in range(0, len(docs), batch_size):
-        batch_docs = docs[i:i+batch_size]
-        vectorstore = Chroma.from_documents(
-            documents=batch_docs,
+    # batch_size = 50
+    # for i in range(0, len(docs), batch_size):
+    #     batch_docs = docs[i:i+batch_size]
+    #     vectorstore = Chroma.from_documents(
+    #         documents=batch_docs,
+    #         embedding=embeddings,
+    #         persist_directory="./chromadb1",
+    #         collection_name="full_documents"
+    #     )
+
+    # vectorstore = Chroma(persist_directory="./chromadb1", collection_name="full_documents", embedding_function=embeddings)
+
+    # batch_size = 50
+    # for i in range(0, len(docs), batch_size):
+    #     batch_docs = docs[i:i+batch_size]
+    #     vectorstore.add_documents(documents=batch_docs)
+
+    vectorstore = Chroma.from_documents(
+            documents=docs,
             embedding=embeddings,
             persist_directory="./chromadb1",
             collection_name="full_documents"
         )
     
-    return vectorstore, embeddings
+    vectorstore.persist()
 
-def query_vectorstore(vectorstore: Chroma):
-    query = "what is the agenda of Financial Statements for 2022?"
-    found_docs = vectorstore.similarity_search(query, k=3)
-    return found_docs
+def query_vectorstore(query):
+    
+    embeddings = FastEmbedEmbeddings(model_name="BAAI/bge-base-en-v1.5")
+    vectorstore = Chroma(embedding_function=embeddings,
+                    persist_directory="./chromadb1",
+                    collection_name="full_documents"
+    )
+
+    config=LLMConfig(llm_provider="Groq")
+    llm = get_llm(config)
+
+    retriever=vectorstore.as_retriever(search_kwargs={'k': 3})
+
+    prompt = PromptTemplate(
+        template="""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+            You are a helpful assistant that is really good on retrieving data from docuemnts.
+
+            <|eot_id|><|start_header_id|>user<|end_header_id|>
+            Use the following pieces of information to answer the user's question.
+            If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+            Context: {context}
+            Question: {question}
+
+            Only return the helpful answer below and nothing else, and contextualize the answer.
+            Helpful answer:
+            <|eot_id|>
+            <|start_header_id|>assistant<|end_header_id|>
+            """,
+            input_variables=["context", "question"],
+    )
+    
+    qa = RetrievalQA.from_chain_type(llm=llm,
+                               chain_type="stuff",
+                               retriever=retriever,
+                               return_source_documents=True,
+                               chain_type_kwargs={"prompt": prompt})
+
+    response = qa.invoke({"query": query})
+    return response["result"]
 
 # Example usage
 # llama_parse_documents should be a list of Document objects with a 'text' attribute

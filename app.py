@@ -6,6 +6,21 @@ st.set_page_config(
     page_title="AI"
 )
 
+st.markdown(
+    """
+    <style>
+    .answer {
+        font-size: 24px;
+        color: black;
+        background-color: #f0f0f0;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 class MultiApp:
     def __init__(self) -> None:
         self.apps = []

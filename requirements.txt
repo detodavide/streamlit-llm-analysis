@@ -3,6 +3,7 @@ pandasai
 langchain_openai
 langchain_groq
 langchain_experimental
+langchain_huggingface
 langgraph
 pydantic
 typing_extensions
@@ -12,3 +13,5 @@ unstructured
 unstructured[md]
 fastembed
 chromadb
+sentence_transformers > /dev/null
+onnxruntime-gpu
