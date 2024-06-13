@@ -17,7 +17,7 @@ def app():
             st.write("PDF Parsed Successfully!")
 
             if st.button("Create Vector Database"):
-                create_vector_database(parsed_data)
+                create_vector_database(parsed_data, uploaded_file)
                 st.write("Vector Database Created Successfully!")
             
             note = "If the vector database has been already instantiated no need to rerun the creation."
@@ -26,5 +26,5 @@ def app():
             st.markdown("## Ask your Documents!")
             query = st.text_input("Enter your query:", "what is the Balance of UBER TECHNOLOGIES, INC.as of December 31, 2021?")
             if st.button("Send message"):
-                answer = query_vectorstore(query)
+                answer = query_vectorstore(query, uploaded_file)
                 st.markdown(f'<div class="answer">{answer}</div>', unsafe_allow_html=True)

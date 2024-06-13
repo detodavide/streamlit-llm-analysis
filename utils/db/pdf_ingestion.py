@@ -14,7 +14,10 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
 def load_or_parse_data(uploaded_file):
-    data_file = "./data/parsed_data.pkl"
+
+    file_name: str = uploaded_file.name.split('.')[0]
+    print(uploaded_file)
+    data_file = f"./data/{file_name}.pkl"
     
     if os.path.exists(data_file):
         # Load the parsed data from the file
@@ -40,11 +43,12 @@ def load_or_parse_data(uploaded_file):
         
         # Set the parsed data to the variable
         parsed_data = llama_parse_documents
+        print(llama_parse_documents[0])
     
     return parsed_data
 
 # Create vector database
-def create_vector_database(llama_parse_documents):
+def create_vector_database(llama_parse_documents, uploaded_file):
     """
     Creates a vector database using document loaders and embeddings.
 
@@ -53,12 +57,13 @@ def create_vector_database(llama_parse_documents):
     and finally persists the embeddings into a Chroma vector database.
 
     """
-    
-    with open('data/output.md', 'a', encoding='utf-8') as f:  # Open the file in append mode ('a')
+    markdown_path = f"data/{uploaded_file.name.split('.')[0]}.md"
+    file_name: str = uploaded_file.name.split('.')[0]
+
+    with open(markdown_path, 'a', encoding='utf-8') as f:  # Open the file in append mode ('a')
         for doc in llama_parse_documents:
             f.write(doc.text + '\n')
     
-    markdown_path = "data/output.md"
     loader = UnstructuredMarkdownLoader(markdown_path)
 
     documents = loader.load()
@@ -93,17 +98,19 @@ def create_vector_database(llama_parse_documents):
             documents=docs,
             embedding=embeddings,
             persist_directory="./chromadb1",
-            collection_name="full_documents"
+            collection_name=f"{file_name}"
         )
     
     vectorstore.persist()
 
-def query_vectorstore(query):
+def query_vectorstore(query, uploaded_file):
     
+    file_name: str = uploaded_file.name.split('.')[0]
+
     embeddings = FastEmbedEmbeddings(model_name="BAAI/bge-base-en-v1.5")
     vectorstore = Chroma(embedding_function=embeddings,
                     persist_directory="./chromadb1",
-                    collection_name="full_documents"
+                    collection_name=f"{file_name}"
     )
 
     config=LLMConfig(llm_provider="Groq")
