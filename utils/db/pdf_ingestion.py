@@ -9,9 +9,6 @@ from langchain_community.vectorstores import Chroma
 from llm.llm_model import get_llm, LLMConfig
 from langchain.prompts import PromptTemplate
 from langchain.chains.retrieval_qa.base import RetrievalQA
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.embeddings.sentence_transformer import SentenceTransformerEmbeddings
-
 
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
