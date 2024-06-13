@@ -7,5 +7,3 @@ exports/
 cache/
 *.txt
 /chromadb1
-/data/*
-!/data
