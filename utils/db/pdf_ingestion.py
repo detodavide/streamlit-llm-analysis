@@ -16,7 +16,6 @@ load_dotenv(find_dotenv())
 def load_or_parse_data(uploaded_file):
 
     file_name: str = uploaded_file.name.split('.')[0]
-    print(uploaded_file)
     data_file = f"./data/{file_name}.pkl"
     
     if os.path.exists(data_file):
@@ -43,7 +42,6 @@ def load_or_parse_data(uploaded_file):
         
         # Set the parsed data to the variable
         parsed_data = llama_parse_documents
-        print(llama_parse_documents[0])
     
     return parsed_data
 
