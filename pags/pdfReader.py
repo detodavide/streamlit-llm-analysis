@@ -30,4 +30,9 @@ def app():
         query = st.text_input("Enter your query:", "what is the Balance of UBER TECHNOLOGIES, INC.as of December 31, 2021?")
         if st.button("Send message"):
             answer = query_vectorstore(query, uploaded_file)
-            st.markdown(f'<div class="answer">{answer}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="answer">{answer["result"]}</div>', unsafe_allow_html=True)
+
+            with st.expander("Document Similarity Search"):
+                for i, doc in enumerate(answer["source_documents"]):
+                    st.markdown(f"### Document {i+1} \n{doc.page_content}")
+                    st.write("---------------------------------")

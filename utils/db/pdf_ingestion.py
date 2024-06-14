@@ -140,7 +140,7 @@ def query_vectorstore(query, uploaded_file):
                                chain_type_kwargs={"prompt": prompt})
 
     response = qa.invoke({"query": query})
-    return response["result"]
+    return response
 
 # Example usage
 # llama_parse_documents should be a list of Document objects with a 'text' attribute
