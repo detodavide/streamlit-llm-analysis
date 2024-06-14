@@ -14,4 +14,6 @@ fastembed
 chromadb
 sentence_transformers > /dev/null
 onnxruntime-gpu
+streamlit
 streamlit_option_menu
+plotly
