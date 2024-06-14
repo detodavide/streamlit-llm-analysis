@@ -10,6 +10,9 @@ from langchain_community.vectorstores import Chroma
 from llm.llm_model import get_llm, LLMConfig
 from langchain.prompts import PromptTemplate
 from langchain.chains.retrieval_qa.base import RetrievalQA
+from langchain_community.vectorstores import Qdrant
+from qdrant_client import QdrantClient
+
 
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
@@ -73,7 +76,7 @@ def create_vector_database(llama_parse_documents, uploaded_file):
     print(f"total number of document chunks generated :{len(docs)}")
 
     # Initialize Embeddings
-    embeddings = FastEmbedEmbeddings(model_name="BAAI/bge-base-en-v1.5")
+    embeddings = FastEmbedEmbeddings()
 
     # IF it crash use the batch add chunks
     # vectorstore = Chroma(persist_directory="./chromadb1", collection_name=f"{file_name}", embedding_function=embeddings)
@@ -84,24 +87,34 @@ def create_vector_database(llama_parse_documents, uploaded_file):
     #     batch_docs = docs[i:i+batch_size]
     #     vectorstore.add_documents(documents=batch_docs)
 
-    vectorstore = Chroma.from_documents(
-            documents=docs,
-            embedding=embeddings,
-            persist_directory="./chromadb1",
-            collection_name=f"{file_name}"
-        )
+    # vectorstore = Chroma.from_documents(
+    #         documents=docs,
+    #         embedding=embeddings,
+    #         persist_directory="./chromadb1",
+    #         collection_name=f"{file_name}"
+    #     )
     
-    vectorstore.persist()
+    # vectorstore.persist()
+
+    qdrant = Qdrant.from_documents(
+        documents=docs,
+        embedding=embeddings,
+        url=st.secrets["QDRANT_URL"],
+        collection_name="rag",
+        api_key=st.secrets["QDRANT_API_KEY"]
+    )
 
 def query_vectorstore(query, uploaded_file):
     
     file_name: str = uploaded_file.name.split('.')[0]
 
-    embeddings = FastEmbedEmbeddings(model_name="BAAI/bge-base-en-v1.5")
-    vectorstore = Chroma(embedding_function=embeddings,
-                    persist_directory="./chromadb1",
-                    collection_name=f"{file_name}"
-    )
+    embeddings = FastEmbedEmbeddings()
+    # vectorstore = Chroma(embedding_function=embeddings,
+    #                 persist_directory="./chromadb1",
+    #                 collection_name=f"{file_name}"
+    # )
+    client = QdrantClient(api_key=st.secrets["QDRANT_API_KEY"], url=st.secrets["QDRANT_URL"],)
+    vectorstore = Qdrant(client=client, embeddings=embeddings, collection_name="rag")
 
     config=LLMConfig(llm_provider="Groq")
     llm = get_llm(config)

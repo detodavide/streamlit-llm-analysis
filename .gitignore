@@ -8,3 +8,4 @@ cache/
 *.txt
 /chromadb1
 secrets.toml
+.streamlit
