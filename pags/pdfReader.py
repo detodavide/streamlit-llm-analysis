@@ -9,7 +9,9 @@ def app():
         This form provides detailed financial information about the company's performance for a specific quarter. 
         It includes unaudited financial statements, management discussion and analysis, and other relevant disclosures required by the SEC.
         It contains many tables.
-        Try to be precise while answering the questions""")
+        Try to be precise while answering the questions""",
+        height=200
+    )
     uploaded_file = st.file_uploader("Upload a PDF file", type="pdf")
 
     if uploaded_file is not None:
