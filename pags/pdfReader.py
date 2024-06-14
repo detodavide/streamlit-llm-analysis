@@ -13,7 +13,7 @@ def app():
     uploaded_file = st.file_uploader("Upload a PDF file", type="pdf")
 
     if uploaded_file is not None and parsing_prompt:
-        if st.button("Load Data"):
+        if st.button("Process PDF"):
             load_or_parse_data(uploaded_file, parsing_prompt)
 
         st.markdown("## Ask your Documents!")
