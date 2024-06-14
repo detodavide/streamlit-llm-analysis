@@ -17,7 +17,7 @@ from qdrant_client import QdrantClient
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
-def load_or_parse_data(uploaded_file):
+def load_or_parse_data(uploaded_file, parsing_prompt):
 
     file_name: str = uploaded_file.name.split('.')[0]
     data_file = f"./data/{file_name}.pkl"
@@ -27,14 +27,7 @@ def load_or_parse_data(uploaded_file):
         parsed_data = joblib.load(data_file)
     else:
         # Perform the parsing step and store the result in llama_parse_documents
-        parsingInstructionUber10k = """The provided document is a quarterly report filed by Uber Technologies, 
-        Inc. with the Securities and Exchange Commission (SEC). 
-        This form provides detailed financial information about the company's performance for a specific quarter. 
-        It includes unaudited financial statements, management discussion and analysis, and other relevant disclosures required by the SEC.
-        It contains many tables.
-        Try to be precise while answering the questions"""
-        
-        parser = LlamaParse(api_key=st.secrets["LLAMA_PARSE_API_KEY"], result_type="markdown", parsing_instruction=parsingInstructionUber10k)
+        parser = LlamaParse(api_key=st.secrets["LLAMA_PARSE_API_KEY"], result_type="markdown", parsing_instruction=parsing_prompt)
         
         # Load data from the uploaded PDF file
         with open(f"pdfs/{uploaded_file.name}", "wb") as f:
@@ -47,7 +40,7 @@ def load_or_parse_data(uploaded_file):
         # Set the parsed data to the variable
         parsed_data = llama_parse_documents
     
-    return parsed_data
+    create_vector_database(llama_parse_documents=parsed_data, uploaded_file=uploaded_file)
 
 # Create vector database
 def create_vector_database(llama_parse_documents, uploaded_file):
