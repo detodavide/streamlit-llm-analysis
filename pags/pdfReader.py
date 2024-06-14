@@ -1,5 +1,5 @@
 import streamlit as st
-from utils.db.pdf_ingestion import load_or_parse_data, create_vector_database, query_vectorstore
+from utils.db.pdf_ingestion import load_or_parse_data, query_vectorstore
 
 def app():
     st.title("PDF Parsing")
@@ -13,7 +13,8 @@ def app():
     uploaded_file = st.file_uploader("Upload a PDF file", type="pdf")
 
     if uploaded_file is not None and parsing_prompt:
-        load_or_parse_data(uploaded_file, parsing_prompt)
+        if st.button("Load Data"):
+            load_or_parse_data(uploaded_file, parsing_prompt)
 
         st.markdown("## Ask your Documents!")
         query = st.text_input("Enter your query:", "what is the Balance of UBER TECHNOLOGIES, INC.as of December 31, 2021?")
