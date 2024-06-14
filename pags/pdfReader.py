@@ -25,7 +25,7 @@ def app():
             create_vector_database(parsed_data, uploaded_file)
             st.write("PDF Parsed Successfully!")
         
-        note = "If the pdf has already been processed then no need to re-process it."
+        note = "If the pdf has been already processed no need to re-process it."
         st.markdown(f"**Note:** {note}")
 
         st.markdown("## Ask your Documents!")
