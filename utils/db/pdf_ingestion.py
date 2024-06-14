@@ -1,6 +1,7 @@
 import os
 import joblib
 from llama_parse import LlamaParse
+import streamlit as st
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
@@ -30,7 +31,7 @@ def load_or_parse_data(uploaded_file):
         It contains many tables.
         Try to be precise while answering the questions"""
         
-        parser = LlamaParse(api_key=os.getenv("LLAMA_PARSE_API_KEY"), result_type="markdown", parsing_instruction=parsingInstructionUber10k)
+        parser = LlamaParse(api_key=st.secrets["LLAMA_PARSE_API_KEY"], result_type="markdown", parsing_instruction=parsingInstructionUber10k)
         
         # Load data from the uploaded PDF file
         with open(f"pdfs/{uploaded_file.name}", "wb") as f:

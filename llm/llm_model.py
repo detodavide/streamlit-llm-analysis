@@ -7,6 +7,7 @@ import json
 import ollama
 from dotenv import load_dotenv, find_dotenv
 import os
+import streamlit as st
 
 load_dotenv(find_dotenv())
 class LLMConfig(BaseModel):
@@ -17,7 +18,7 @@ class LLMConfig(BaseModel):
 def get_llm(llm_config: Optional[LLMConfig]):
 
     if llm_config.llm_provider == 'Groq':
-        return ChatGroq(model="llama3-70b-8192", temperature=llm_config.temperature)
+        return ChatGroq(api_key=st.secrets["GROQ_API_KEY"], model="llama3-70b-8192", temperature=llm_config.temperature)
     elif llm_config.llm_provider == 'Ollama':
         return ChatOllama(base_url=os.getenv("OLLAMA_HOST"), model=llm_config.model, temperature=llm_config.temperature)
     elif llm_config.llm_provider == 'OpenAI':
