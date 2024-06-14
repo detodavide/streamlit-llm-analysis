@@ -100,7 +100,7 @@ def create_vector_database(llama_parse_documents, uploaded_file):
         documents=docs,
         embedding=embeddings,
         url=st.secrets["QDRANT_URL"],
-        collection_name="rag",
+        collection_name=file_name,
         api_key=st.secrets["QDRANT_API_KEY"]
     )
 
@@ -114,7 +114,7 @@ def query_vectorstore(query, uploaded_file):
     #                 collection_name=f"{file_name}"
     # )
     client = QdrantClient(api_key=st.secrets["QDRANT_API_KEY"], url=st.secrets["QDRANT_URL"],)
-    vectorstore = Qdrant(client=client, embeddings=embeddings, collection_name="rag")
+    vectorstore = Qdrant(client=client, embeddings=embeddings, collection_name=file_name)
 
     config=LLMConfig(llm_provider="Groq")
     llm = get_llm(config)
