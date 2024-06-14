@@ -1,5 +1,5 @@
 import streamlit as st
-from utils.db.pdf_ingestion import load_or_parse_data, query_vectorstore
+from utils.db.pdf_ingestion import load_or_parse_data, create_vector_database, query_vectorstore
 
 def app():
     st.title("PDF Parsing")
@@ -12,13 +12,22 @@ def app():
         Try to be precise while answering the questions""")
     uploaded_file = st.file_uploader("Upload a PDF file", type="pdf")
 
-    if uploaded_file is not None and parsing_prompt:
-        if st.button("Process PDF"):
-            vs = load_or_parse_data(uploaded_file, parsing_prompt)
+    if uploaded_file is not None:
+        parsed_data = load_or_parse_data(uploaded_file, parsing_prompt)
 
-        if vs is not None:
-            st.markdown("## Ask your Documents!")
-            query = st.text_input("Enter your query:", "what is the Balance of UBER TECHNOLOGIES, INC.as of December 31, 2021?")
-            if st.button("Send message"):
-                answer = query_vectorstore(query, uploaded_file)
-                st.markdown(f'<div class="answer">{answer}</div>', unsafe_allow_html=True)
+        if parsed_data is None:
+            st.write("Parsing the data")
+
+
+        if st.button("Process PDF"):
+            create_vector_database(parsed_data, uploaded_file)
+            st.write("PDF Parsed Successfully!")
+        
+        note = "If the pdf has already been processed then no need to re-process it."
+        st.markdown(f"**Note:** {note}")
+
+        st.markdown("## Ask your Documents!")
+        query = st.text_input("Enter your query:", "what is the Balance of UBER TECHNOLOGIES, INC.as of December 31, 2021?")
+        if st.button("Send message"):
+            answer = query_vectorstore(query, uploaded_file)
+            st.markdown(f'<div class="answer">{answer}</div>', unsafe_allow_html=True)

@@ -40,7 +40,7 @@ def load_or_parse_data(uploaded_file, parsing_prompt):
         # Set the parsed data to the variable
         parsed_data = llama_parse_documents
     
-    return create_vector_database(llama_parse_documents=parsed_data, uploaded_file=uploaded_file)
+    return parsed_data
 
 # Create vector database
 def create_vector_database(llama_parse_documents, uploaded_file):
@@ -96,8 +96,6 @@ def create_vector_database(llama_parse_documents, uploaded_file):
         collection_name=file_name,
         api_key=st.secrets["QDRANT_API_KEY"]
     )
-
-    return qdrant
 
 def query_vectorstore(query, uploaded_file):
     
