@@ -97,6 +97,8 @@ def create_vector_database(llama_parse_documents, uploaded_file):
         api_key=st.secrets["QDRANT_API_KEY"]
     )
 
+    return qdrant
+
 def query_vectorstore(query, uploaded_file):
     
     file_name: str = uploaded_file.name.split('.')[0]

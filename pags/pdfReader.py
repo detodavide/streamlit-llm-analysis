@@ -14,10 +14,11 @@ def app():
 
     if uploaded_file is not None and parsing_prompt:
         if st.button("Process PDF"):
-            load_or_parse_data(uploaded_file, parsing_prompt)
+            vs = load_or_parse_data(uploaded_file, parsing_prompt)
 
-        st.markdown("## Ask your Documents!")
-        query = st.text_input("Enter your query:", "what is the Balance of UBER TECHNOLOGIES, INC.as of December 31, 2021?")
-        if st.button("Send message"):
-            answer = query_vectorstore(query, uploaded_file)
-            st.markdown(f'<div class="answer">{answer}</div>', unsafe_allow_html=True)
+        if vs is not None:
+            st.markdown("## Ask your Documents!")
+            query = st.text_input("Enter your query:", "what is the Balance of UBER TECHNOLOGIES, INC.as of December 31, 2021?")
+            if st.button("Send message"):
+                answer = query_vectorstore(query, uploaded_file)
+                st.markdown(f'<div class="answer">{answer}</div>', unsafe_allow_html=True)
