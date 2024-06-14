@@ -200,7 +200,7 @@ soupsieve==2.5
 SQLAlchemy==2.0.29
 stack-data==0.6.3
 starlette==0.37.2
-streamlit @ ./extension/streamlit-1.32.2-py2.py3-none-any.whl
+streamlit @ ./extension_package/streamlit-1.32.2-py2.py3-none-any.whl
 streamlit-option-menu==0.3.12
 summarytools==0.3.0
 sympy==1.12.1
